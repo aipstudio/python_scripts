@@ -14,7 +14,7 @@ def main():
             password=config.get('ZABBIX', 'password'))
     f = open('result.txt', 'w', encoding="utf-8")
     f.flush
-    hosts = z.host.get(groupids=34, output=['hostid', 'name'])
+    hosts = z.host.get(groupids=34, output=['hostid', 'name'], sortfield='name')
     for host in hosts:
         items = z.item.get(hostids=host['hostid'],
                            filter={

@@ -17,7 +17,9 @@ def get_ou_pg():
     with conn:
         with conn.cursor() as cur:
             sql = '''select ''|| 'ou' || p.id , p.fullname from basis.t_partner p
-                     where (p.partner_e_mail like 'af%%@%' or p.partner_e_mail like 'fk%%@%') and p.id = 17860''' #and p.id = 17860
+                     where (p.partner_e_mail like 'af%%@%' or p.partner_e_mail like 'fk%%@%')
+                     order by p.id;
+                     ''' #and p.id = 17860
             cur.execute(sql)
             records = cur.fetchall()
     conn.close()  #на всякий случай
@@ -32,21 +34,22 @@ def main():
             password=config.get('ZABBIX', 'password'))
     hosts = z.host.get(
         groupids=34,
-        #        hostids=14269,
-        output=['hostid', 'name', 'description'])
+        #hostids=14269,
+        output=['hostid', 'name', 'description'], sortfield='name')
 
     for host in hosts:
         for pg_ou in pg_ous:
-            if host['name'] == pg_ou[0]:
-                z.do_request(
-                    'host.update', {
-                        'hostid': host['hostid'],
-                        'name': host['name'],
-                        'description': pg_ou[1]
-                    })
-                print("%-6s %-10s %-40s" %
-                      (host['hostid'], host['name'], pg_ou[1]))
-                break
+            if host['name'].lower() == pg_ou[0]:
+                if host['description'] == '':
+                    z.do_request(
+                        'host.update', {
+                            'hostid': host['hostid'],
+                            'name': host['name'],
+                            'description': pg_ou[1]
+                        })
+                    print("%-6s %-10s %-40s" %
+                          (host['hostid'], host['name'], pg_ou[1]))
+                    break
 
 
 if __name__ == '__main__':

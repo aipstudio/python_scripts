@@ -18,7 +18,8 @@ def get_users_pg():
     sql = '''select u.id, u.sname||' '||u.name||' '||u.pname AS "FIO", u.user_login AS "login" , u.email, u.department_id AS "kod_otdela", d.name AS "OTDEL", u.status,
     case when u.status & 2 = 2 then 'WORKS' else 'LOCK' end AS "status_job"
     from basis.T_User u join basis.t_department d on d.id = u.department_id
-    where u.email != '' and u.status & 2 >= 2 --u.department_id = 15; '''
+    where u.email != '' and u.status & 2 >= 2 --u.department_id = 15
+    order by u.user_login; '''
     cursor.execute(sql)
     records = cursor.fetchall()
     cursor.close()
@@ -47,6 +48,7 @@ def get_users_ldap():
         c.search(f'OU={pg_u_group},OU=Пользователи,DC=apteka,DC=aprel',
                  '(objectclass=person)',
                  attributes=['cn', 'sAMAccountName', 'mail'])
+
         for user_ldap in c.entries:
             if user_ldap['mail'] == None:
                 for pg_user in pg_users:
@@ -55,11 +57,9 @@ def get_users_ldap():
                               (str(user_ldap['sAMAccountName']),
                                str(user_ldap['cn']), str(user_ldap['mail']),
                                str(pg_user[3]), pg_u_group))
-                        # print(user_ldap.entry_dn)
-                        #c.modify (user_ldap.entry_dn, {'mail': [(MODIFY_REPLACE, [str(user_pg[3])])]})
-    #c.search('OU=Отдел системного администрирования (IT),OU=Пользователи,DC=apteka,DC=aprel', '(&(objectclass=person)(sAMAccountName=prozhoga_ay))', attributes=['cn', 'sAMAccountName', 'mail'])
-    #c.search('OU=АХС (AHS),OU=Пользователи,DC=apteka,DC=aprel', '(objectclass=person)', attributes=['cn', 'sAMAccountName', 'mail'])
-
+                        #print(user_ldap.entry_dn)
+                        #c.modify(user_ldap.entry_dn, {'mail': [(ldap3.MODIFY_REPLACE, [str(pg_user[3])])]})
+                        break
     c.unbind()
     c.closed
 

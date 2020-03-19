@@ -7,7 +7,6 @@ import datetime
 import pymysql
 from pymysql.cursors import DictCursor
 from contextlib import closing
-from pyzabbix import ZabbixAPI
 
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8-sig')
@@ -15,9 +14,6 @@ otrs_ip = config.get('OTRS', 'host')
 otrs_pass = config.get('OTRS', 'password')
 
 users = {}
-new_tickets_today = 0
-close_tickets_today = 0
-open_tickets = 0
 
 def get_otrs_users():
     con = pymysql.connect(otrs_ip, 'otrs_conn',
@@ -114,6 +110,8 @@ def get_from_DB( id):
 
 def db_to_users():
     global close_tickets_today, open_tickets
+    close_tickets_today = 0
+    open_tickets = 0
     for user in users:
         #print(users[user]['user'])
         user_id = users[user]['id']
@@ -128,6 +126,7 @@ def db_to_users():
 
 def count_new_from_db():
     global new_tickets_today
+    new_tickets_today = 0
     connection = pymysql.connect(
         host=otrs_ip,
         user='otrs_conn',

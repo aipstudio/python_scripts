@@ -40,10 +40,11 @@ def main():
                 q4 = item['lastvalue'] + ' | '
             if item['name'] == 'Oracle - Size Dir':
                 q5 = str(round(float(item['lastvalue']) / 1024 / 1024 / 1024, 1)) + ' Gb | '
-            if item['name'] == 'Oracle scripts - scheduler':
+            #if item['name'] == 'Oracle scripts - scheduler':
             #if item['name'] == 'Oracle scripts - scheduler no work job':
             #if item['name'] == 'Oracle scripts - free space warning':
-                q6 = item['lastvalue'].replace("\r", " ").replace("\n", " ") + ' | '
+            #    q6 = item['lastvalue'].replace("\r", " ").replace("\n", " ") + ' | '
+            q6=''
             result = host['name'] + ' | ' + q1 + q2 + q3 + q4 + q5 + q6 + "\n"
         f.write(result)
     f.close()

@@ -1,21 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from flask import Flask, jsonify, make_response, request
-from nt import abort
+from flask import Flask, jsonify, make_response, request, abort
+import threading
+import os
 
 app = Flask(__name__)
 
-mks = [
-    {
-        'id': '1234',
-        'Configure': True
-    },
-    {
-        'id': '12345',
-        'Configure': False
-    }
-]
-
+mks = []
 
 @app.route('/mk', methods=['GET'])
 def get_mks():
@@ -25,25 +16,31 @@ def get_mks():
 @app.route('/mk', methods=['POST'])
 def create_mk():
     if not request.json:  # or not 'id' in request.json:
+        return make_response(jsonify({'error': 'Wrong JSON'}), 400)
         abort(400)
     for row in request.json:
         mk = {
             'id': row['id'],
-            'Configure': row['Configure']
+            'Configure': False
         }
         mks.append(mk)
+    
+    def do_work(value):
+        for row in mks:
+            print(row['id'])
+            #os.system('zabbix_sender -z '+server+' -s '+row['id'].lower()+' -k mikrotik_trap -o "Микротик нуждается в конфигурировании."')
+
+    
+    thread = threading.Thread(target=do_work(mks))
+    thread.start()
     # mk = {
     #     'id': request.json['id'],
     #     'Configure': request.json['Configure']
     # }
     # mks.append(mk)
     # return jsonify({'mk': mk}), 201
-    return jsonify(request.json), 201
-
-
-@app.route('/')
-def index():
-    return "Hello, World!"
+    #return jsonify(request.json), 201
+    return jsonify('{STATUS: OK}'), 201
 
 
 @app.errorhandler(404)
